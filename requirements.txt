@@ -2,7 +2,5 @@ Flask
 langchain-core
 langchain-groq
 langchain-chroma
-langchain-huggingface
-sentence-transformers
 python-dotenv
 gunicorn
