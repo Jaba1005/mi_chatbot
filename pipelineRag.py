@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_huggingface import HuggingFaceEmbeddings
+from embeddings_onnx import MultilingualOnnxEmbeddings
 
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -15,11 +15,7 @@ llm = ChatGroq(
 )
 
 # Debe ser el mismo modelo con el que se indexó la base (ver paso4.py)
-embeddings_model = HuggingFaceEmbeddings(
-    model_name="paraphrase-multilingual-MiniLM-L12-v2",
-    model_kwargs={"device": "cpu"},
-    encode_kwargs={"normalize_embeddings": True}
-)
+embeddings_model = MultilingualOnnxEmbeddings()
 
 vector_store = Chroma(
     persist_directory="./chroma",

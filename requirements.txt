@@ -4,5 +4,7 @@ langchain-groq
 langchain-chroma
 python-dotenv
 gunicorn
-langchain-huggingface
-sentence-transformers
+onnxruntime
+sentencepiece
+huggingface_hub
+numpy

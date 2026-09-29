@@ -3,11 +3,11 @@ import shutil
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from embeddings_onnx import MultilingualOnnxEmbeddings
 
 # Modelo multilingüe: entiende español (all-MiniLM-L6-v2 solo inglés)
 # Debe ser EL MISMO que usa pipelineRag.py para consultar
-EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
+EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2 (ONNX int8)"
 
 PDF_DIR = "pdfs"
 PERSIST_DIR = "./chroma"
@@ -30,11 +30,7 @@ chunks = text_splitter.split_documents(documents)
 print(f"Fragmentos generados: {len(chunks)}")
 
 # 3. Embeddings locales
-embeddings_model = HuggingFaceEmbeddings(
-    model_name=EMBEDDING_MODEL,
-    model_kwargs={"device": "cpu"},
-    encode_kwargs={"normalize_embeddings": True}
-)
+embeddings_model = MultilingualOnnxEmbeddings()
 
 # 4. Borrar la base anterior y crear una nueva con los fragmentos
 if os.path.exists(PERSIST_DIR):
