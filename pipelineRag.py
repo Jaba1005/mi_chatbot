@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
+from langchain_huggingface import HuggingFaceEmbeddings
 
 load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -14,12 +14,16 @@ llm = ChatGroq(
     api_key=GROQ_API_KEY
 )
 
-# Usamos la función nativa ligera de Chroma (cero consumo de RAM)
-lightweight_ef = DefaultEmbeddingFunction()
+# Debe ser el mismo modelo con el que se indexó la base (ver paso4.py)
+embeddings_model = HuggingFaceEmbeddings(
+    model_name="paraphrase-multilingual-MiniLM-L12-v2",
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": True}
+)
 
 vector_store = Chroma(
     persist_directory="./chroma",
-    embedding_function=lightweight_ef,
+    embedding_function=embeddings_model,
     collection_name="mis_programas"
 )
 
@@ -36,7 +40,7 @@ Respuesta:'''
 
 prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
 
-def rag_pipeline(pregunta, k=5):
+def rag_pipeline(pregunta, k=8):
     retriever_k = vector_store.as_retriever(
         search_type="similarity",
         search_kwargs={"k": k}

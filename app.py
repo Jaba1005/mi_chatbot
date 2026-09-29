@@ -17,7 +17,7 @@ def chat():
     
     try:
         # Llama a tu IA con la pregunta del usuario
-        bot_response = rag_pipeline(user_message, 5)
+        bot_response = rag_pipeline(user_message, 8)
         return jsonify({'response': bot_response})
         
     except Exception as e:
