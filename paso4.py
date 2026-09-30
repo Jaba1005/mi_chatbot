@@ -17,13 +17,16 @@ COLLECTION_NAME = "mis_programas"
 documents = []
 for pdf_file in sorted(f for f in os.listdir(PDF_DIR) if f.endswith(".pdf")):
     pages = PyPDFLoader(os.path.join(PDF_DIR, pdf_file)).load()
+    for p in pages:
+        # Solo el nombre del archivo: la ruta de Windows ("pdfs\x.pdf") no sirve en Render (Linux)
+        p.metadata["source"] = pdf_file
     documents.extend(pages)
     print(f"  {pdf_file}: {len(pages)} páginas cargadas")
 
 # 2. Partir en fragmentos
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,
-    chunk_overlap=200,
+    chunk_size=500,
+    chunk_overlap=50,
     separators=["\n\n", "\n", ".", " "]
 )
 chunks = text_splitter.split_documents(documents)
