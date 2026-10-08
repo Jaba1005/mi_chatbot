@@ -1,5 +1,7 @@
 import os
+import json
 import shutil
+import numpy as np
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -11,6 +13,7 @@ EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2 (ONNX int8)"
 
 PDF_DIR = "pdfs"
 PERSIST_DIR = "./chroma"
+INDICE_DIR = "./indice"
 COLLECTION_NAME = "mis_programas"
 
 # 1. Cargar los PDFs
@@ -56,3 +59,20 @@ print(f"  Ubicación:             {PERSIST_DIR}/")
 print(f"  Colección:             {coleccion.name}")
 print(f"  Fragmentos indexados:  {coleccion.count()}")
 print(f"  Modelo embeddings:     {EMBEDDING_MODEL} (local, CPU)")
+
+# 5. Exportar los vectores para el servidor (pipelineRag.py busca con numpy:
+#    el motor de Chroma se quedaba congelado en Render)
+datos = coleccion.get(include=["embeddings", "documents", "metadatas"])
+os.makedirs(INDICE_DIR, exist_ok=True)
+np.save(os.path.join(INDICE_DIR, "vectores.npy"), np.asarray(datos["embeddings"], dtype=np.float32))
+fragmentos = [
+    {
+        "texto": texto,
+        "fuente": meta.get("source", "?"),
+        "pagina": meta.get("page_label", meta.get("page", "?")),
+    }
+    for texto, meta in zip(datos["documents"], datos["metadatas"])
+]
+with open(os.path.join(INDICE_DIR, "fragmentos.json"), "w", encoding="utf-8") as f:
+    json.dump(fragmentos, f, ensure_ascii=False)
+print(f"  Índice para el servidor: {INDICE_DIR}/ ({len(fragmentos)} fragmentos)")
