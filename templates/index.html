@@ -237,12 +237,17 @@
             actualizarEntrada();
             mostrarEscribiendo();
 
+            // Si el servidor no responde en 2 minutos, cancela y avisa en vez de esperar para siempre
+            const control = new AbortController();
+            const limite = setTimeout(() => control.abort(), 120000);
+
             try {
                 // Envía los datos al backend de Flask
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
+                    body: JSON.stringify({ message: text }),
+                    signal: control.signal
                 });
 
                 const data = await response.json();
@@ -253,8 +258,12 @@
             } catch (error) {
                 console.error('Error de conexión:', error);
                 ocultarEscribiendo();
-                appendMessage('No pude conectarme con el servidor. Revisa tu conexión e inténtalo de nuevo.', 'bot', true);
+                const mensaje = error.name === 'AbortError'
+                    ? 'El servidor tardó demasiado en responder. Inténtalo de nuevo en un momento.'
+                    : 'No pude conectarme con el servidor. Revisa tu conexión e inténtalo de nuevo.';
+                appendMessage(mensaje, 'bot', true);
             } finally {
+                clearTimeout(limite);
                 esperando = false;
                 actualizarEntrada();
                 userInput.focus();

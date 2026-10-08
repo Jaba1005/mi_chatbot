@@ -7,5 +7,6 @@ threads = 2
 # Render gratis tiene 0.1 CPU: cargar el modelo y responder puede pasar de 30 s
 timeout = 180
 
-# Carga el modelo antes de crear el worker, así la carga no cuenta para el timeout
-preload_app = True
+# NO usar preload_app: onnxruntime y Chroma crean hilos internos que no
+# sobreviven al fork del worker y la app se queda colgada sin responder
+preload_app = False
