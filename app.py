@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, jsonify
 from pipelineRag import rag_pipeline
 
@@ -25,4 +26,7 @@ def chat():
         return jsonify({'response': 'Lo siento, tuve un problema consultando el reglamento.'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Render asigna el puerto mediante la variable de entorno PORT
+    puerto_render = int(os.environ.get("PORT", 5000))
+    # host="0.0.0.0" permite que la app reciba conexiones desde internet
+    app.run(host="0.0.0.0", port=puerto_render)
